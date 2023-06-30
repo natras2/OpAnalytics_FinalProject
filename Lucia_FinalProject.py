@@ -5,18 +5,13 @@ from math import log, exp
 from statsmodels.tsa.seasonal import seasonal_decompose
 
 if __name__ == "__main__":
-    original_df = pd.read_csv("./datasets/IoT_traffic_management.csv")
+    original_df = pd.read_csv("dataset/IoT_traffic_management.csv")
 
     # Preprocessing
     original_df = original_df.drop(original_df[original_df.Junction > 1].index)
     original_df['Date'] = pd.to_datetime(original_df['DateTime']).dt.date
     original_df['Time'] = pd.to_datetime(original_df['DateTime']).dt.time
     original_df = original_df[['Date', 'Time', 'Vehicles']]
-
-    # Exctraction of the last two months
-    #original_df['Date'] = pd.to_datetime(original_df['Date'], errors='coerce')
-    #original_df = original_df.drop(original_df[original_df['Date'].dt.year < 2017].index)
-    #original_df = original_df.drop(original_df[original_df['Date'].dt.month < 5].index)
 
     # Extraction of the last 9 weeks of data
     # 24 hours * 7 days * 9 weeks = 1512 records
@@ -72,7 +67,7 @@ if __name__ == "__main__":
     plt.plot(ds_logdiff)
     plt.show()
 
-    
+
 
 
     pass
