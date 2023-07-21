@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from math import log, exp
 from statsmodels.tsa.seasonal import seasonal_decompose
+from resources.utils import logdiff, invert_logdiff
+from resources.models.neural import do_MLP
+from resources.models.statistical import do_SARIMAX, do_autoARIMA
 
 if __name__ == "__main__":
     original_df = pd.read_csv("dataset/IoT_traffic_management.csv")
@@ -28,46 +30,70 @@ if __name__ == "__main__":
         ]
         i += 1
 
+    # Data Visualization
+    print("Rows: ", df.shape[0])
+    print("Columns: ", df.shape[1])
+    print("Missing values:\n", df.isnull().any())
+
     # Slicing in train and test sets
     dataset = df.Vehicles
 
-    testlength = int(len(dataset) * 0.30)
-    train = dataset[:-testlength]
-    test = dataset[-testlength:]
+    cutpoint = int(len(dataset) * 0.7)
+    train = dataset[:cutpoint]
+    test = dataset[cutpoint:]
 
     plt.plot(train, label="train")
-    plt.plot([None for i in train] + [x for x in test], label="test")
+    plt.plot(test, label="test")
     plt.xlabel('time')
     plt.ylabel('n of cars')
     plt.legend()
     plt.show()
 
-    # To perform the decomposition
-    # "period" paramenter defines the number of periods within a season.
+    # The "period" defines the number of periods within a season.
     # As I wanted to exploit a weekly seasonality I calculated 6 records per day * 7 days per week = 42 periods
-    decomposition = seasonal_decompose(dataset, model='multiplicative', period=42)
+    n_periods = 42
+
+    # To perform the decomposition
+    decomposition = seasonal_decompose(dataset, model='multiplicative', period=n_periods)
     decomposition.plot()
     plt.show()
 
-    # calculate logdiff
-    def logdiff(data, interval):
-        result = [log(x) for x in data]
-        result = [result[i] - result[i - interval] for i in range(interval, len(result))]
-        return result
+    # Not-stationary dataset: SARIMAX - Statistical prediction
+    sarimax_fore = do_SARIMAX(train, n_periods, len(test))
+    sarimax_fore = pd.Series(sarimax_fore, index=range(len(train), len(train) + len(sarimax_fore)))
 
-    # invert logdiff
-    def invert_logdiff(orig_data, diff_data, interval):
-        orig_data = [log(x) for x in orig_data]
-        result = [diff_data[i - interval] + orig_data[i - interval] for i in range(interval, len(orig_data))]
-        result = [exp(x) for x in result]
-        return result
-
-
-    ds_logdiff = logdiff(dataset, 1)
-    plt.plot(ds_logdiff)
+    plt.plot(train, label="train")
+    plt.plot(test, label="expected", color="darkgray")
+    plt.plot(sarimax_fore, label="forecast", alpha=0.5)
+    plt.legend()
     plt.show()
 
+    # Stationary dataset: SARIMAX - Statistical prediction
+    # l_dataset, ld_dataset = logdiff(dataset)
+    #
+    # ld_train = ld_dataset[:cutpoint]
+    # ld_test = ld_dataset[cutpoint:]
+    #
+    # ld_sarimax_fore = do_autoARIMA(ld_train, len(ld_test), False)
+    #
+    # sarimax_fore = invert_logdiff(test.iloc[0], ld_sarimax_fore, False)
+    # sarimax_fore = pd.Series(sarimax_fore, index=range(len(train), len(train) + len(sarimax_fore)))
+    #
+    # plt.plot(train, label="train")
+    # plt.plot(test, label="expected", color="darkgray")
+    # plt.plot(sarimax_fore, label="forecast", alpha=0.5)
+    # plt.legend()
+    # plt.show()
 
+    # Not-stationary dataset: MLP - Neural prediction
+    MLP_train_pred, MLP_fore = do_MLP(dataset, cutpoint)
+    MLP_fore = pd.Series(MLP_fore, index=range(len(train), len(train) + len(MLP_fore)))
+
+    plt.plot(train, label="train")
+    plt.plot(test, label="expected", color="darkgray")
+    plt.plot(MLP_fore, label="forecast", alpha=0.5)
+    plt.legend()
+    plt.show()
 
 
     pass
