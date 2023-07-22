@@ -7,12 +7,12 @@ def do_autoARIMA(dataset, fore_periods, is_seasonal: bool, periodicity=0):
     # we use pmdarima to estimate them
     if is_seasonal:
         model = pm.auto_arima(dataset, start_p=1, start_q=1,
-                          test='adf', max_p=3, max_q=3, m=periodicity,
-                          start_P=0, seasonal=True,
-                          d=None, D=1, trace=True,
-                          error_action='ignore',
-                          suppress_warnings=True,
-                          stepwise=True)  # False full grid
+                              test='adf', max_p=3, max_q=3, m=periodicity,
+                              start_P=0, seasonal=True,
+                              d=None, D=1, trace=True,
+                              error_action='ignore',
+                              suppress_warnings=True,
+                              stepwise=True)  # False full grid
     else:
         model = pm.auto_arima(dataset,
                               test='adf', seasonal=False, d=0,
