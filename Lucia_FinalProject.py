@@ -62,12 +62,12 @@ if __name__ == "__main__":
     plt.show()
 
     # SARIMAX - Statistical prediction
-    sarimax_fore = do_SARIMAX(train, n_periods, len(test))
-    sarimax_fore = pd.Series(sarimax_fore, index=range(len(train), len(train) + len(sarimax_fore)))
+    SARIMAX_fore = do_SARIMAX(train, n_periods, len(test))
+    SARIMAX_fore = pd.Series(SARIMAX_fore, index=range(len(train), len(train) + len(SARIMAX_fore)))
 
     plt.plot(train, label="train")
     plt.plot(test, label="expected", color="darkgray")
-    plt.plot(sarimax_fore, label="forecast", alpha=0.5)
+    plt.plot(SARIMAX_fore, label="forecast", alpha=0.5)
     plt.xlabel('time')
     plt.ylabel('n of cars')
     plt.title("SARIMAX - Statistical prediction")
@@ -80,14 +80,14 @@ if __name__ == "__main__":
     # ld_train = ld_dataset[:cutpoint]
     # ld_test = ld_dataset[cutpoint:]
     #
-    # ld_sarimax_fore = do_autoARIMA(ld_train, len(ld_test), False)
+    # ld_SARIMAX_fore = do_autoARIMA(ld_train, len(ld_test), False)
     #
-    # sarimax_fore = invert_logdiff(test.iloc[0], ld_sarimax_fore, False)
-    # sarimax_fore = pd.Series(sarimax_fore, index=range(len(train), len(train) + len(sarimax_fore)))
+    # SARIMAX_fore = invert_logdiff(test.iloc[0], ld_SARIMAX_fore, False)
+    # SARIMAX_fore = pd.Series(SARIMAX_fore, index=range(len(train), len(train) + len(SARIMAX_fore)))
     #
     # plt.plot(train, label="train")
     # plt.plot(test, label="expected", color="darkgray")
-    # plt.plot(sarimax_fore, label="forecast", alpha=0.5)
+    # plt.plot(SARIMAX_fore, label="forecast", alpha=0.5)
     # plt.legend()
     # plt.show()
 
@@ -118,13 +118,13 @@ if __name__ == "__main__":
     plt.show()
 
     # Diebold-Mariano test
-    dm_sarimax_mlp = dm_test(test, sarimax_fore, MLP_fore, h=1, crit="MSE")
-    dm_sarimax_RF = dm_test(test, sarimax_fore, RF_fore, h=1, crit="MSE")
-    dm_RF_mlp = dm_test(test, RF_fore, MLP_fore, h=1, crit="MSE")
+    dm_SARIMAX_MLP = dm_test(test, SARIMAX_fore, MLP_fore, h=1, crit="MSE")
+    dm_SARIMAX_RF = dm_test(test, SARIMAX_fore, RF_fore, h=1, crit="MSE")
+    dm_RF_MLP = dm_test(test, RF_fore, MLP_fore, h=1, crit="MSE")
 
-    print(dm_sarimax_mlp)
-    print(dm_sarimax_RF)
-    print(dm_RF_mlp)
+    print(dm_SARIMAX_MLP)
+    print(dm_SARIMAX_RF)
+    print(dm_RF_MLP)
 
     # Define the critical values (e.g., for a 95% confidence level)
     critical_value = 1.96
@@ -137,9 +137,9 @@ if __name__ == "__main__":
         }, index=['SARIMAX', 'MLP', 'RF'])
 
     # Compare the DM statistics with the critical value and the p-value
-    if abs(dm_sarimax_mlp.DM) > critical_value and dm_sarimax_mlp.p_value < p_value:
+    if abs(dm_SARIMAX_MLP.DM) > critical_value and dm_SARIMAX_MLP.p_value < p_value:
         # Null-hypothesis rejected
-        if dm_sarimax_mlp.DM > 0:
+        if dm_SARIMAX_MLP.DM > 0:
             print("SARIMAX forecast is significantly more accurate than MLP's")
             comparison_result.loc['SARIMAX', 'MLP'] = 1
         else:
@@ -149,9 +149,9 @@ if __name__ == "__main__":
         # Null-hypothesis accepted
         print("There isn't a significative difference in accuracy between SARIMAX forecast and MLP's")
 
-    if abs(dm_sarimax_RF.DM) > critical_value and dm_sarimax_RF.p_value < p_value:
+    if abs(dm_SARIMAX_RF.DM) > critical_value and dm_SARIMAX_RF.p_value < p_value:
         # Null-hypothesis rejected
-        if dm_sarimax_RF.DM > 0:
+        if dm_SARIMAX_RF.DM > 0:
             print("SARIMAX forecast is significantly more accurate than RandomForest's")
             comparison_result.loc['SARIMAX', 'RF'] = 1
         else:
@@ -161,9 +161,9 @@ if __name__ == "__main__":
         # Null-hypothesis accepted
         print("There isn't a significative difference in accuracy between SARIMAX forecast and RandomForest's")
 
-    if abs(dm_RF_mlp.DM) > critical_value and dm_RF_mlp.p_value < p_value:
+    if abs(dm_RF_MLP.DM) > critical_value and dm_RF_MLP.p_value < p_value:
         # Null-hypothesis rejected
-        if dm_RF_mlp.DM > 0:
+        if dm_RF_MLP.DM > 0:
             print("RandomForest forecast is significantly more accurate than MLP's")
             comparison_result.loc['RF', 'MLP'] = 1
         else:
@@ -188,7 +188,7 @@ if __name__ == "__main__":
         print("I proceed to check for the most accurate model using MAE (Mean Absolute Error)")
 
         # Check for the most accurate model using MAE (Mean Absolute Error)
-        SARIMAX_mae = mean_absolute_error(test, sarimax_fore)
+        SARIMAX_mae = mean_absolute_error(test, SARIMAX_fore)
         print("SARIMAX - MAE = {}".format(SARIMAX_mae))
         comparison_result.loc['SARIMAX', 'SARIMAX'] = SARIMAX_mae
 
