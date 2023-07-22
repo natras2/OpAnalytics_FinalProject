@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error
 
 
 def do_bagging(ds, lookback, cutpoint):
@@ -24,8 +23,6 @@ def do_bagging(ds, lookback, cutpoint):
 
     # forecast testset
     pred = RFmodel.predict(xtest)
-    mse = mean_absolute_error(ytest, pred)
-    print("RandomForest - MSE = {}".format(mse))
 
     # Stats about the trees in random forest
     n_nodes = []

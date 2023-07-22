@@ -145,9 +145,6 @@ if __name__ == "__main__":
         else:
             print("MLP forecast is significantly more accurate than SARIMAX's")
             comparison_result.loc['MLP', 'SARIMAX'] = 1
-    else:
-        # Null-hypothesis accepted
-        print("There isn't a significative difference in accuracy between SARIMAX forecast and MLP's")
 
     if abs(dm_SARIMAX_RF.DM) > critical_value and dm_SARIMAX_RF.p_value < p_value:
         # Null-hypothesis rejected
@@ -157,9 +154,6 @@ if __name__ == "__main__":
         else:
             print("RandomForest forecast is significantly more accurate than SARIMAX's")
             comparison_result.loc['RF', 'SARIMAX'] = 1
-    else:
-        # Null-hypothesis accepted
-        print("There isn't a significative difference in accuracy between SARIMAX forecast and RandomForest's")
 
     if abs(dm_RF_MLP.DM) > critical_value and dm_RF_MLP.p_value < p_value:
         # Null-hypothesis rejected
@@ -169,22 +163,13 @@ if __name__ == "__main__":
         else:
             print("MLP forecast is significantly more accurate than RandomForest's")
             comparison_result.loc['MLP', 'RF'] = 1
-    else:
-        # Null-hypothesis accepted
-        print("There isn't a significative difference in accuracy between RandomForest forecast and MLP's")
 
     max_sum_value = comparison_result.sum(axis=1).max()
-    max_sum_rows = comparison_result[comparison_result.sum(axis=1) == max_sum_value].index
-
-    if len(max_sum_rows) == 1:
-        most_accurate_model = "is " + max_sum_rows[0]
+    if max_sum_value == 2:
+        most_accurate_model = comparison_result.sum(axis=1).idxmax()
+        print("The most accurate model is {}".format(most_accurate_model))
     else:
-        most_accurate_model = "are " + ", ".join(max_sum_rows[:-1]) + " and " + max_sum_rows[-1]
-
-    if max_sum_value > 0 and len(max_sum_rows) < 3:
-        print("The most accurate model(s) {}".format(most_accurate_model))
-    else:
-        print("There isn't a model significantly more accurate than others according to Diebold-Mariano test")
+        print("There isn't a model that is significantly more accurate than both the other two according to the Diebold-Mariano test")
         print("I proceed to check for the most accurate model using MAE (Mean Absolute Error)")
 
         # Check for the most accurate model using MAE (Mean Absolute Error)
